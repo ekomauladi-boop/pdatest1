@@ -6,7 +6,8 @@ from langchain_community.vectorstores import Chroma
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
-from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_huggingface import HuggingFaceEmbeddings
 
 # Konfigurasi Halaman Streamlit
 st.set_page_config(
@@ -16,7 +17,7 @@ st.set_page_config(
 )
 
 st.title("🕌 Chatbot Informasi Cagar Budaya Masjid Syuhada")
-st.caption("Aplikasi RAG berbasis Metadata DCMI menggunakan Google Gemini")
+st.caption("Aplikasi RAG berbasis Metadata DCMI menggunakan Google Gemini & HuggingFace")
 
 # Ambil Google Gemini API Key dari Streamlit Secrets
 google_api_key = st.secrets.get("GOOGLE_API_KEY") or os.environ.get("GOOGLE_API_KEY")
@@ -56,11 +57,8 @@ def init_vector_store():
     loader = DataFrameLoader(df, page_content_column="page_content")
     documents = loader.load()
     
-    # Menggunakan model embedding bawaan yang stabil
-    embeddings = GoogleGenerativeAIEmbeddings(
-        model="text-embedding-004", 
-        google_api_key=google_api_key
-    )
+    # Menggunakan Embedding HuggingFace yang stabil dan gratis tanpa error API
+    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
     
     vectorstore = Chroma.from_documents(documents=documents, embedding=embeddings)
     return vectorstore
