@@ -26,16 +26,20 @@ if not google_api_key:
     st.error("⚠️ API Key Google Gemini belum ditemukan. Tambahkan `GOOGLE_API_KEY` di menu Secrets Streamlit Cloud.")
     st.stop()
 
+# Nama model Gemini. Jika ditolak, ganti dengan "gemini-flash-latest".
+GEMINI_MODEL = "gemini-3.8-flash"
+
+
 # Fungsi Inisialisasi Data & Vector Store
 @st.cache_resource(show_spinner="Memuat data metadata cagar budaya...")
 def init_vector_store():
     file_path = "Metadata_DCMI_Masjid_Syuhada.xlsx"
-    
-    if file_path.endswith('.csv'):
+
+    if file_path.endswith(".csv"):
         df = pd.read_csv(file_path)
     else:
         df = pd.read_excel(file_path)
-    
+
     def format_row(row):
         return (
             f"ID Elemen: {row.get('Element_ID', '')}\n"
@@ -51,17 +55,18 @@ def init_vector_store():
             f"Rekomendasi Pelestarian: {row.get('Preservation_Recommendation', '')}\n"
             f"Dokumen Rujukan: {row.get('Source_Document', '')}"
         )
-    
-    df['page_content'] = df.apply(format_row, axis=1)
-    
+
+    df["page_content"] = df.apply(format_row, axis=1)
+
     loader = DataFrameLoader(df, page_content_column="page_content")
     documents = loader.load()
-    
+
     # Menggunakan Embedding HuggingFace yang stabil dan gratis tanpa error API
     embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-    
+
     vectorstore = Chroma.from_documents(documents=documents, embedding=embeddings)
     return vectorstore
+
 
 try:
     vectorstore = init_vector_store()
@@ -84,14 +89,17 @@ prompt = ChatPromptTemplate.from_messages([
     ("human", "{input}"),
 ])
 
+# PERBAIKAN: model lama "gemini-1.5-flash" sudah tidak tersedia (404 NOT_FOUND)
 llm = ChatGoogleGenerativeAI(
-    model="gemini-1.5-flash", 
-    temperature=0.2, 
+    model=GEMINI_MODEL,
+    temperature=0.2,
     google_api_key=google_api_key
 )
 
+
 def format_docs(docs):
     return "\n\n---\n\n".join(doc.page_content for doc in docs)
+
 
 rag_chain = (
     {"context": retriever | format_docs, "input": RunnablePassthrough()}
@@ -124,5 +132,5 @@ if user_input := st.chat_input("Ketik pertanyaan di sini..."):
             except Exception as err:
                 response = f"Terjadi kendala: {err}"
                 st.error(response)
-    
+
     st.session_state.messages.append({"role": "assistant", "content": response})
