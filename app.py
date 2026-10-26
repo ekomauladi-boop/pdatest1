@@ -29,7 +29,7 @@ if not google_api_key:
 @st.cache_resource(show_spinner="Memuat dan mengindeks data metadata dengan Gemini...")
 def init_vector_store():
     # Membaca file Excel
-    file_path = "data/Metadata_DCMI_Masjid_Syuhada.xlsx"
+    file_path = "Metadata_DCMI_Masjid_Syuhada.xlsx"
     df = pd.read_csv(file_path) if file_path.endswith('.csv') else pd.read_excel(file_path)
     
     # Gabungkan isi seluruh kolom ke dalam satu teks kaya konteks per baris
