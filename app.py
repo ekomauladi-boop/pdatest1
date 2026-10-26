@@ -28,7 +28,7 @@ if not google_api_key:
 # 3. Fungsi Ingest Data & Inisialisasi Vector Store (Dengan Caching)
 @st.cache_resource(show_spinner="Memuat dan mengindeks data metadata cagar budaya...")
 def init_vector_store():
-    file_path = "data/Metadata_DCMI_Masjid_Syuhada.xlsx"
+    file_path = "Metadata_DCMI_Masjid_Syuhada.xlsx"
     
     # Membaca data Excel/CSV
     if file_path.endswith('.csv'):
